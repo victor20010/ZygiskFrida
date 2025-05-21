@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZygiskFrida Конфигуратор</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Конфигурация ZygiskFrida</h1>
+
+        <div class="tabs">
+            <button class="tab-link active" data-tab="configTab">Конфигурация</button>
+            <button class="tab-link" data-tab="logcatTab">Logcat (ZygiskFrida)</button>
+        </div>
+
+        <!-- Configuration Tab Content -->
+        <div id="configTab" class="tab-content active">
+            <div class="controls">
+                <button id="loadConfigBtn">Загрузить конфигурацию</button>
+                <button id="saveConfigBtn">Сохранить ВСЕ изменения на устройстве</button>
+                <hr class="controls-divider">
+                <button id="exportConfigBtn">Экспорт Config</button>
+                <button id="importConfigBtn">Импорт Config</button>
+                <input type="file" id="importConfigFile" accept=".json" style="display: none;">
+            </div>
+
+            <div id="configEditor">
+                <h2>Цели (Targets)</h2>
+                <div id="targetsList">
+                    <p>Загрузите конфигурацию, чтобы увидеть цели.</p>
+                </div>
+                <hr>
+                <div class="target-form-container">
+                  <h3 id="formTitle">Добавить новую цель</h3>
+                  <input type="hidden" id="editingTargetIndex" value="-1">
+
+                  <label for="app_name">Имя приложения (Package ID):</label><br>
+                  <div class="input-with-button">
+                    <input type="text" id="app_name" placeholder="com.example.app">
+                    <button type="button" id="openAppPickerBtn" class="inline-btn">Выбрать</button>
+                  </div>
+
+                  <label><input type="checkbox" id="enabled_chk"> Включено</label><br>
+
+                  <label for="start_up_delay_ms">Задержка запуска (мс):</label><br>
+                  <input type="number" id="start_up_delay_ms" placeholder="0"><br>
+
+                  <h4>Инжектируемые библиотеки (.so)</h4>
+                  <label for="available_libs">Доступные .so в <code>/data/local/tmp/re.zyg.fri/</code> (и <code>libs/</code>):</label><br>
+                  <div class="dynamic-selector">
+                    <select id="available_libs">
+                        <option value="">-- Выберите библиотеку --</option>
+                    </select>
+                    <button type="button" id="addSelectedLibBtn" class="control-btn">Добавить выбранную</button>
+                  </div>
+                  <div id="currentInjectedLibsList" class="current-files-list"></div>
+                  <div id="gadgetHelperMessages" class="gadget-helper"></div>
+                  <button type="button" id="toggleManualEditLibsBtn" class="manual-edit-toggle-btn">Редактировать JSON вручную</button>
+                  <textarea id="injected_libraries_json" rows="4" placeholder='[{"path": "/data/local/tmp/re.zyg.fri/libgadget.so"}]' readonly></textarea>
+                  <small>Примечание: Для Frida гаджетов, требующих специфической конфигурации (например, другой порт), убедитесь, что рядом с файлом гаджета (.so) существует файл <code>имя_гаджета.config.so</code> с нужными настройками.</small><br>
+
+                  <h4>Child Gating (Экспериментально)</h4>
+                  <label><input type="checkbox" id="child_gating_enabled_chk"> Включено</label><br>
+                  <label for="child_gating_mode">Режим (Mode):</label><br>
+                  <select id="child_gating_mode">
+                      <option value="freeze">Freeze</option>
+                      <option value="kill">Kill</option>
+                      <option value="inject">Inject</option>
+                  </select><br>
+                  <label for="child_gating_injected_libraries_json">Инжектируемые библиотеки для Child Gating (JSON массив):</label><br>
+                  <textarea id="child_gating_injected_libraries_json" rows="3" placeholder='[{"path": "/data/local/tmp/re.zyg.fri/libgadget-child.so"}]'></textarea><br>
+                  
+                  <button id="submitTargetBtn">Добавить цель</button>
+                  <button type="button" id="cancelEditBtn" style="display:none;">Отменить редактирование</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logcat Tab Content -->
+        <div id="logcatTab" class="tab-content">
+            <h2>Logcat (фильтр: ZygiskFrida)</h2>
+            <div class="logcat-controls">
+                <button id="refreshLogcatBtn">Обновить логи</button>
+                <button id="clearLogcatBtn">Очистить</button>
+            </div>
+            <pre id="logcatOutput" class="logcat-output-area">Нажмите "Обновить логи" для просмотра.</pre>
+        </div>
+
+
+        <div id="statusBar">
+            <p>Статус: Бездействует</p>
+        </div>
+    </div>
+
+    <!-- App Picker Modal -->
+    <div id="appPickerModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close-btn" id="closeAppPickerModalBtn">&times;</span>
+            <h3>Выберите приложение</h3>
+            <input type="text" id="appSearchInput" placeholder="Поиск по Package ID...">
+            <div id="appListContainer" class="app-list-container">
+                <p>Загрузка списка приложений...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
